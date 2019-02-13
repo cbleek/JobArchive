@@ -1,0 +1,8 @@
+specFileName: /Users/legendarypanda/Desktop/test/openapi.json
+apiTitle: teset
+splitSpec: false
+codeSamples: false
+swaggerUI: true
+travis: true
+repo: SJhumili/swagger-test
+oasVersion: 3.0.0
