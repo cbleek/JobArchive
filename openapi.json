@@ -1,8 +1,8 @@
 {
   "openapi" : "3.0.0",
   "info" : {
-    "title" : "Simple User CRUD",
-    "description" : "This is a sample CURD API",
+    "title" : "Job Archive",
+    "description" : "API for an archive of job postings.",
     "version" : "1.0.0"
   },
   "servers" : [ {
