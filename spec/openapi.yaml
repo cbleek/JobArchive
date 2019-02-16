@@ -110,6 +110,8 @@ paths:
         schema:
           type: string
       responses:
+        200:
+          description: Successful operation
         400:
           description: Invalid username supplied
         404:
@@ -206,12 +208,18 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Job'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Job'
         required: true
       responses:
         default:
           description: successful operation
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+            application/xml:
               schema:
                 $ref: '#/components/schemas/Job'
 components:
