@@ -172,32 +172,13 @@ paths:
       tags:
       - job
       summary: Get Job list
-      description: This can only be done by the logged in user.
+      description: Get Job list. If username is defined in parameters, will retrieve joblist that user posted. If undefined, will retrieve all joblists.
       operationId: getJoblist
-      responses:
-        default:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Job'
-      security: []
-  /job/{username}:
-    get:
-      tags:
-      - job
-      summary: Get Job list by username
-      description: This can only be done by the logged in user.
-      operationId: getUserJoblist
       parameters:
       - name: username
-        in: path
-        description: getUserJoblist
-        required: true
+        in: header
+        description: The name that needs to be fetched. Use user1 for testing.
         style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -213,6 +194,7 @@ paths:
           description: Invalid username supplied
         404:
           description: User not found
+      security: []
 components:
   schemas:
     User:
