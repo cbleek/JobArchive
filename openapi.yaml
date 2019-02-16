@@ -13,9 +13,8 @@ security:
 tags:
 - name: user
   description: Operations about user
-  externalDocs:
-    description: Find out more about our store
-    url: http://swagger.io
+- name: job
+  description: Operations about job
 paths:
   /user:
     post:
@@ -168,6 +167,52 @@ paths:
       responses:
         default:
           description: successful operation
+  /job:
+    get:
+      tags:
+      - job
+      summary: Get Job list
+      description: This can only be done by the logged in user.
+      operationId: getJoblist
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+      security: []
+  /job/{username}:
+    get:
+      tags:
+      - job
+      summary: Get Job list by username
+      description: This can only be done by the logged in user.
+      operationId: getUserJoblist
+      parameters:
+      - name: username
+        in: path
+        description: getUserJoblist
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+        400:
+          description: Invalid username supplied
+        404:
+          description: User not found
 components:
   schemas:
     User:
@@ -186,6 +231,9 @@ components:
           type: string
       xml:
         name: User
+    Job:
+      type: object
+
   requestBodies:
     UserArray:
       description: List of user object
