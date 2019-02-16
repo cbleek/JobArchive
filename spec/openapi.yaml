@@ -194,7 +194,26 @@ paths:
           description: Invalid username supplied
         404:
           description: User not found
-      security: []
+    post:
+      tags:
+      - job
+      summary: Post a Job
+      description: This can only be done by the logged in user.
+      operationId: postjob
+      requestBody:
+        description: Created job object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+        required: true
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
 components:
   schemas:
     User:
