@@ -1,25 +1,25 @@
 openapi: 3.0.0
 info:
   title: Job Archive
-  description: API for an archive of job postings.
+  description: API for managing a job postings archive. TEST Commit
   version: 1.0.0
 servers:
-- url: https://virtserver.swaggerhub.com/SJhumili/JobArchiveAPI/1.0.0
-  description: SwaggerHub API Auto Mocking
+  - url: 'https://virtserver.swaggerhub.com/SJhumili/JobArchiveAPI/1.0.0'
+    description: SwaggerHub API Auto Mocking
 security:
-- application:
-  - read
-  - write
+  - application:
+      - read
+      - write
 tags:
-- name: user
-  description: Operations about user
-- name: job
-  description: Operations about job
+  - name: user
+    description: Operations about user
+  - name: job
+    description: Operations about job
 paths:
   /user:
     post:
       tags:
-      - user
+        - user
       summary: Create user
       description: This can only be done by the logged in user.
       operationId: createUser
@@ -38,23 +38,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
       security: []
-  /user/{username}:
+  '/user/{username}':
     get:
       tags:
-      - user
+        - user
       summary: Get user by user name
       operationId: getUserByName
       parameters:
-      - name: username
-        in: path
-        description: The name that needs to be fetched. Use user1 for testing.
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: username
+          in: path
+          description: The name that needs to be fetched. Use user1 for testing.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -63,25 +63,25 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/User'
-        400:
+        '400':
           description: Invalid username supplied
-        404:
+        '404':
           description: User not found
     put:
       tags:
-      - user
+        - user
       summary: Updated user
       description: This can only be done by the logged in user.
       operationId: updateUser
       parameters:
-      - name: username
-        in: path
-        description: name that need to be updated
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: username
+          in: path
+          description: name that need to be updated
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Updated user object
         content:
@@ -90,38 +90,38 @@ paths:
               $ref: '#/components/schemas/User'
         required: true
       responses:
-        400:
+        '400':
           description: Invalid user supplied
-        404:
+        '404':
           description: User not found
     delete:
       tags:
-      - user
+        - user
       summary: Delete user
       description: This can only be done by the logged in user.
       operationId: deleteUser
       parameters:
-      - name: username
-        in: path
-        description: The name that needs to be deleted
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: username
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: Successful operation
-        400:
+        '400':
           description: Invalid username supplied
-        404:
+        '404':
           description: User not found
   /user/login:
-    get:
+    post:
       tags:
         - user
       summary: Logs user into the system
-      description: ""
+      description: ''
       operationId: loginUser
       parameters:
         - name: username
@@ -137,7 +137,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: successful operation
           headers:
             X-Rate-Limit:
@@ -157,14 +157,14 @@ paths:
             application/json:
               schema:
                 type: string
-        "400":
+        '400':
           description: Invalid username/password supplied
   /user/logout:
     get:
       tags:
         - user
       summary: Logs out current logged in user session
-      description: ""
+      description: ''
       operationId: logoutUser
       responses:
         default:
@@ -172,19 +172,19 @@ paths:
   /job:
     get:
       tags:
-      - job
+        - job
       summary: Get Job list
-      description: Get Job list. If username is defined in parameters, will retrieve joblist that user posted. If undefined, will retrieve all joblists.
+      description: 'Get Job list. If username is defined in parameters, will retrieve joblist that user posted. If undefined, will retrieve all joblists.'
       operationId: getJoblist
       parameters:
-      - name: username
-        in: header
-        description: The name that needs to be fetched. Use user1 for testing.
-        style: simple
-        schema:
-          type: string
+        - name: username
+          in: header
+          description: The name that needs to be fetched. Use user1 for testing.
+          style: simple
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -192,13 +192,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Job'
-        400:
+        '400':
           description: Invalid username supplied
-        404:
+        '404':
           description: User not found
     post:
       tags:
-      - job
+        - job
       summary: Post a Job
       description: This can only be done by the logged in user.
       operationId: postjob
@@ -242,7 +242,6 @@ components:
         name: User
     Job:
       type: object
-
   requestBodies:
     UserArray:
       description: List of user object
@@ -258,7 +257,7 @@ components:
       type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: http://example.com/oauth/token
+          tokenUrl: 'http://example.com/oauth/token'
           scopes:
             write: allows writing resources
             read: allows reading resources
