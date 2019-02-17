@@ -117,7 +117,7 @@ paths:
         404:
           description: User not found
   /user/login:
-    get:
+    post:
       tags:
         - user
       summary: Logs user into the system
