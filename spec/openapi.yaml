@@ -15,32 +15,12 @@ security:
   - bearerAuth: [] 
 paths:
   /user:
-    post:
-      tags:
-      - user
-      summary: Create user
-      description: This can only be done by the logged in user.
-      operationId: createUser
-      requestBody:
-        description: Created user object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-        required: true
-      responses:
-        default:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-      security: []
     get:
       tags:
       - user
       summary: Get user information
-      operationId: getUserByName
+      description: An authenticated user be able to retrieve his or her information
+      operationId: getuser
       responses:
         200:
           description: successful operation
@@ -48,39 +28,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+              example:
+                username: test
+                email: test@test.com
+                password: test
             application/xml:
               schema:
                 $ref: '#/components/schemas/User'
-        400:
-          description: Invalid username supplied
-        404:
-          description: User not found
+              example:
+                username: test
+                email: test@test.com
+                password: test
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
     put:
       tags:
       - user
-      summary: Updated user
-      description: This can only be done by the logged in user.
-      operationId: updateUser
-      parameters:
-      - name: access-token
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+      summary: Update user profile
+      description: An authenticated user be able to update information.
+      operationId: updateuser
       requestBody:
         description: Updated user object
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
+            example:
+              username: test
+              email: test@test.com
+              password: test
         required: true
       responses:
-        400:
-          description: Invalid user supplied
-        404:
-          description: User not found
+        200:
+          description: User data successfully updated.
+        default:
+          $ref: '#/components/responses/UnauthorizedError'
     delete:
       tags:
       - user
@@ -103,6 +85,26 @@ paths:
           description: Invalid username supplied
         404:
           description: User not found
+  /user/signup:
+    post:
+      tags:
+      - user
+      summary: Create user
+      description: User be able to sign up with username, password, email. After sign up backend will send token to email.
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        200:
+          description: successful operation
+        default:
+          description: The eamil is using by someone else or password.
+      security: []
   /user/login:
     post:
       tags:
