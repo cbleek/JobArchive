@@ -104,25 +104,24 @@ paths:
         404:
           description: User not found
   /user/login:
-    get:
+    post:
       tags:
         - user
       summary: Logs user into the system and server will respond user's access-token 
       description: ""
       operationId: loginUser
-      parameters:
-        - name: username
-          in: query
-          description: The user name for login
-          required: true
-          schema:
-            type: string
-        - name: password
-          in: query
-          description: The password for login in clear text
-          required: true
-          schema:
-            type: string
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+        required: true
       responses:
         200:
           description: successful operation
@@ -160,6 +159,55 @@ paths:
           description: User successfully log out.
         401:
           $ref: '#/components/responses/UnauthorizedError'
+  /addjoblink:
+    post:
+      tags:
+      - job
+      summary: Post a link
+      description: An authenticated user be able to post a link
+      operationId: addjoblink
+      requestBody:
+        description: Job url
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+        required: true
+      responses:
+        200:
+          description: Job link added successfully.
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+  /joblinks:
+    get:
+      tags:
+      - job
+      summary: Get Job lists
+      description: An authenticated user be able to retrieve joblinks
+      operationId: getjoblinks
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [all, mine]
+            example: all
+          description: if type='all' user be able to retrieve all jobads but not 'all' user will retrieve his own posted jobads
+      responses:
+        200:
+          description: Job links
+          content:
+            application/json:
+              schema: 
+                type: array
+                items: 
+                  type: string
+                  example: ['http://example.com/job1', 'http://example.com/job2']
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
 components:
   schemas:
     User:
@@ -168,8 +216,6 @@ components:
         username:
           type: string
         email:
-          type: string
-        phone:
           type: string
         password:
           type: string
@@ -182,4 +228,4 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT 
+      bearerFormat: JWT
