@@ -6,15 +6,13 @@ info:
 servers:
 - url: https://virtserver.swaggerhub.com/SJhumili/JobArchiveAPI/1.0.0
   description: SwaggerHub API Auto Mocking
-security:
-- application:
-  - read
-  - write
 tags:
 - name: user
   description: Operations about user
 - name: job
   description: Operations about job
+security:
+  - bearerAuth: [] 
 paths:
   /user:
     post:
@@ -38,21 +36,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
       security: []
-  /user/{username}:
     get:
       tags:
       - user
-      summary: Get user by user name
+      summary: Get user information
       operationId: getUserByName
-      parameters:
-      - name: username
-        in: path
-        description: The name that needs to be fetched. Use user1 for testing.
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
       responses:
         200:
           description: successful operation
@@ -74,9 +62,8 @@ paths:
       description: This can only be done by the logged in user.
       operationId: updateUser
       parameters:
-      - name: username
+      - name: access-token
         in: path
-        description: name that need to be updated
         required: true
         style: simple
         explode: false
@@ -120,7 +107,7 @@ paths:
     get:
       tags:
         - user
-      summary: Logs user into the system
+      summary: Logs user into the system and server will respond user's access-token 
       description: ""
       operationId: loginUser
       parameters:
@@ -137,7 +124,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        200:
           description: successful operation
           headers:
             X-Rate-Limit:
@@ -154,82 +141,30 @@ paths:
             application/xml:
               schema:
                 type: string
+                example: pong
             application/json:
               schema:
                 type: string
-        "400":
+                example: pong
+        400:
           description: Invalid username/password supplied
   /user/logout:
     get:
       tags:
         - user
-      summary: Logs out current logged in user session
+      summary: Logs out current logged in user
       description: ""
       operationId: logoutUser
       responses:
-        default:
-          description: successful operation
-  /job:
-    get:
-      tags:
-      - job
-      summary: Get Job list
-      description: Get Job list. If username is defined in parameters, will retrieve joblist that user posted. If undefined, will retrieve all joblists.
-      operationId: getJoblist
-      parameters:
-      - name: username
-        in: header
-        description: The name that needs to be fetched. Use user1 for testing.
-        style: simple
-        schema:
-          type: string
-      responses:
         200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Job'
-        400:
-          description: Invalid username supplied
-        404:
-          description: User not found
-    post:
-      tags:
-      - job
-      summary: Post a Job
-      description: This can only be done by the logged in user.
-      operationId: postjob
-      requestBody:
-        description: Created job object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Job'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Job'
-        required: true
-      responses:
-        default:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Job'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Job'
+          description: User successfully log out.
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
 components:
   schemas:
     User:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
         username:
           type: string
         email:
@@ -240,25 +175,11 @@ components:
           type: string
       xml:
         name: User
-    Job:
-      type: object
-
-  requestBodies:
-    UserArray:
-      description: List of user object
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/User'
-      required: true
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
   securitySchemes:
-    application:
-      type: oauth2
-      flows:
-        clientCredentials:
-          tokenUrl: http://example.com/oauth/token
-          scopes:
-            write: allows writing resources
-            read: allows reading resources
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
