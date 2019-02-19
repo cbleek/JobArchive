@@ -193,7 +193,7 @@ paths:
           description: Job link added successfully.
         401:
           $ref: '#/components/responses/UnauthorizedError'
-  /joblinks:
+  /listlinks:
     get:
       tags:
       - job
