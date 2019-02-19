@@ -6,7 +6,11 @@ info:
 servers:
 - url: https://virtserver.swaggerhub.com/SJhumili/JobArchiveAPI/1.0.0
   description: SwaggerHub API Auto Mocking
+- url: http://localhost:8000
+  description: Test in localserver
 tags:
+- name: auth
+  description: Operations about auth
 - name: user
   description: Operations about user
 - name: job
@@ -14,7 +18,105 @@ tags:
 security:
   - bearerAuth: [] 
 paths:
-  /user:
+  /signup:
+    post:
+      tags:
+      - auth
+      summary: Create user
+      description: User be able to sign up with username, password, email. After sign up backend will send token to email.
+      operationId: signupuser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              name: test
+              email: test@test.com
+              password: test
+        required: true
+      responses:
+        200:
+          description: New user successfully created.
+        default:
+          description: The eamil is using by someone else.
+      security: []
+  /signin:
+    post:
+      tags:
+        - auth
+      summary: Sign in with username(email) and password
+      description: User be able to sign into the system and server will respond access-token, and this access-token should be stored in session. This access-token will be used to use other api. Backend will identify user using access-token.
+      operationId: signin
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Loginrequest'
+            example:
+              username: test
+              password: test
+        required: true
+      responses:
+        200:
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/xml:
+              schema:
+                type: string
+                example: pong
+            application/json:
+              schema:
+                type: string
+                example: pong
+        400:
+          description: Invalid username/password supplied
+  /logout:
+    post:
+      tags:
+        - auth
+      summary: Logs out current logged in user
+      description: ""
+      operationId: logoutUser
+      responses:
+        200:
+          description: User successfully log out.
+        default:
+          $ref: '#/components/responses/UnauthorizedError'
+  /validateemail:
+    get:
+      tags:
+      - auth
+      summary: Confirm user's email address
+      operationId: confirmemail
+      parameters:
+      - in: query
+        name: token
+        description: this token is from backend after sign up
+        required: true
+        schema:
+          type: string
+        example: awevbbrntye2y53n5467xcvbn35u7mu3456
+      responses:
+        200:
+          description: Email address has been confirmed.
+        default:
+          description: Something went wrong
+      security: []
+  /api/user:
     get:
       tags:
       - user
@@ -74,106 +176,7 @@ paths:
           description: Your profile deleted successfully.
         401:
           $ref: '#/components/responses/UnauthorizedError'
-
-  /user/signup:
-    post:
-      tags:
-      - user
-      summary: Create user
-      description: User be able to sign up with username, password, email. After sign up backend will send token to email.
-      operationId: signupuser
-      requestBody:
-        description: Created user object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-            example:
-              name: test
-              email: test@test.com
-              password: test
-        required: true
-      responses:
-        200:
-          description: New user successfully created.
-        default:
-          description: The eamil is using by someone else.
-      security: []
-  /user/login:
-    post:
-      tags:
-        - user
-      summary: Login with username(email) and password
-      description: Logs user into the system and server will respond access-token, and this access-token should be stored in session. This access-token will be used to use other api. Backend will identify user using access-token.
-      operationId: loginUser
-      requestBody:
-        description: Created user object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Loginrequest'
-            example:
-              username: test
-              password: test
-        required: true
-      responses:
-        200:
-          description: successful operation
-          headers:
-            X-Rate-Limit:
-              description: calls per hour allowed by the user
-              schema:
-                type: integer
-                format: int32
-            X-Expires-After:
-              description: date in UTC when token expires
-              schema:
-                type: string
-                format: date-time
-          content:
-            application/xml:
-              schema:
-                type: string
-                example: pong
-            application/json:
-              schema:
-                type: string
-                example: pong
-        400:
-          description: Invalid username/password supplied
-      security: []
-  /user/logout:
-    post:
-      tags:
-        - user
-      summary: Logs out current logged in user
-      description: ""
-      operationId: logoutUser
-      responses:
-        200:
-          description: User successfully log out.
-        default:
-          $ref: '#/components/responses/UnauthorizedError'
-  /validateemail:
-    get:
-      tags:
-      - user
-      summary: Confirm user's email address
-      operationId: confirmemail
-      parameters:
-      - in: query
-        name: token
-        description: this token is from backend after sign up
-        required: true
-        schema:
-          type: string
-        example: awevbbrntye2y53n5467xcvbn35u7mu3456
-      responses:
-        200:
-          description: Email address has been confirmed.
-        default:
-          description: Something went wrong
-  /addjoblink:
+  /api/addjoblink:
     post:
       tags:
       - job
@@ -194,7 +197,7 @@ paths:
           description: Job link added successfully.
         401:
           $ref: '#/components/responses/UnauthorizedError'
-  /listlinks:
+  /api/listlinks:
     get:
       tags:
       - job
