@@ -32,7 +32,7 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
             example:
-              name: test
+              username: test
               email: test@test.com
               password: test
         required: true
