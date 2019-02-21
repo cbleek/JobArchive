@@ -195,7 +195,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Job'
+              type: string
             example:
               url: 'http://example/job1'
         required: true
@@ -227,14 +227,10 @@ paths:
               schema: 
                 type: array
                 items: 
-                  $ref: '#/components/schemas/Job'
+                  type: string
               example:
-                -Job1:   # Example 1
-                  value:
-                    url: 'http://example/job1'
-                -Job2:   # Example 2 
-                  value:
-                    url: 'http://example/job2'
+                joblinks:
+                  ['http://example/job1','http://example/job2']
         401:
           $ref: '#/components/responses/UnauthorizedError'
 components:
@@ -257,11 +253,6 @@ components:
           type: string
         password:
           type: string  
-    Job:
-      type: object
-      properties:
-        url:
-          type: string
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
