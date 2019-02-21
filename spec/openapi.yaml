@@ -8,6 +8,8 @@ servers:
   description: SwaggerHub API Auto Mocking
 - url: http://localhost:8000
   description: Test in localserver
+- url: https://api.yawik.org
+  description: Test in api.yawik.org
 tags:
 - name: auth
   description: Operations about auth
@@ -46,7 +48,7 @@ paths:
     post:
       tags:
         - auth
-      summary: Sign in with username(email) and password
+      summary: Sign in with email and password
       description: User be able to sign into the system and server will respond access-token, and this access-token should be stored in session. This access-token will be used to use other api. Backend will identify user using access-token.
       operationId: signin
       requestBody:
@@ -54,9 +56,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Loginrequest'
+              $ref: '#/components/schemas/SigninRequest'
             example:
-              username: test
+              email: test@test.com
               password: test
         required: true
       responses:
@@ -77,13 +79,18 @@ paths:
             application/xml:
               schema:
                 type: string
-                example: pong
+                example: Bearer 35775k6dehgn678865k87k748o233
             application/json:
               schema:
                 type: string
-                example: pong
+                example: Bearer 35775k6dehgn678865k87k748o233
+        404:
+          description: User not found
         400:
-          description: Invalid username/password supplied
+          description: Invalid email/password supplied
+        422:
+          description: email/password not supplied
+      security: []
   /logout:
     post:
       tags:
@@ -243,10 +250,10 @@ components:
           type: string
       xml:
         name: User
-    Loginrequest:
+    SigninRequest:
       type: object
       properties:
-        username:
+        email:
           type: string
         password:
           type: string  
