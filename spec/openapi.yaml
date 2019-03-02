@@ -223,19 +223,53 @@ paths:
           description: if type='all' user be able to retrieve all jobads but not 'all' user will retrieve his own posted jobads
       responses:
         '200':
-          description: Job links
+          description: gets a list of job postings
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: string
+                  $ref: '#/components/schemas/Location'
               example:
                 joblinks:
                   - 'http://example/job1'
                   - 'http://example/job2'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+/api/job:
+    get:
+      tags:
+        - job
+      summary: get a job posting
+      description: get detailais of a job posting
+      parameters:
+        - in: id
+          name: id
+          schema:
+            type: string
+            example: myReference-234
+      responses:
+        '200':
+          description: gets detail of a job posting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '404':
+          description: job posting was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '410':
+          description: job posting was found, but the posting was deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+            
 components:
   schemas:
     User:
@@ -265,10 +299,12 @@ components:
           description: An url of an avtive job posting which can be downloaded.
         title:
           type: string
+          readOnly: true
           nullable: true
           description: optional The title of the job (not the title of the posting). For example, "Software Engineer" or "Barista". For example.
         datePosted:
           type: string
+          readOnly: true
           nullable: true
           format: date-time
           description: optional start date of a job posting.  
@@ -280,10 +316,12 @@ components:
         description:
           type: string
           nullable: true
+          readOnly: true
           description: optional description of a job posting.  
         employmentType:
           type: array
           nullable: true
+          readOnly: true
           items:
             type: string
             enum:
@@ -299,8 +337,15 @@ components:
         hiringOrganization:
           type: object
           nullable: true
+          readOnly: true
           items:
             $ref: '#/components/schemas/Organization'
+        baseSalary:
+          type: object
+          nullable: true
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Salary'
         applicantLocationRequirements:
           type: object
           nullable: true
@@ -338,6 +383,11 @@ components:
       description: The physical location(s) of the business where the employee will report to work (such as an office or worksite), not the location where the job was posted. Include as many fields as possible. The more properties you provide, the higher quality the job posting is to our users.
       
         https://schema.org/PostalAddress
+    Salary:
+      type: object
+      properties:
+        currency:
+          type: string
     Organization:
       type: object
       properties:
