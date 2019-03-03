@@ -1,0 +1,8 @@
+specFileName: /Volumes/MacData/project/Swagger/JobArchiveAPIYaml/openapi.yaml
+apiTitle: JobArchive
+splitSpec: false
+codeSamples: false
+swaggerUI: true
+travis: true
+repo: sjhumili/swaggerapi
+oasVersion: 3.0.0
