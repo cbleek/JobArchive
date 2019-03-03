@@ -3,7 +3,20 @@
   "info": {
     "title": "Job Archive",
     "description": "API for an archive of job postings.",
-    "version": "0.0.1"
+    "version": "0.0.1",
+    "contact": {
+      "name": "API Support",
+      "email": "contact@yawik.org",
+      "url": "https://github.com/cbleek/JobArchive"
+    },
+    "x-logo": {
+      "url": "https://github.com/cross-solution/YAWIK/blob/develop/module/Core/public/images/logo.jpg",
+      "altText": "Yawik logo"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/cbleek/JobArchive/blob/master/LICENSE"
+    }
   },
   "servers": [
     {
@@ -157,7 +170,7 @@
             "description": "User successfully log out."
           },
           "default": {
-            "$ref": "#/components/responses/UnauthorizedError"
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -197,8 +210,8 @@
         "tags": [
           "user"
         ],
-        "summary": "Get user information",
-        "description": "An authenticated user be able to retrieve his or her information",
+        "summary": "Gets a user by ID.",
+        "description": "A detailed description of the operation. Use markdown for rich text representation, such as **bold**, *italic*, and [links](https://swagger.io).\n",
         "operationId": "getuser",
         "responses": {
           "200": {
@@ -227,7 +240,7 @@
             }
           },
           "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -259,7 +272,7 @@
             "description": "User data successfully updated."
           },
           "default": {
-            "$ref": "#/components/responses/UnauthorizedError"
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -275,7 +288,7 @@
             "description": "Your profile deleted successfully."
           },
           "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -307,7 +320,7 @@
             "description": "Job link added successfully."
           },
           "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -356,7 +369,7 @@
             }
           },
           "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -390,7 +403,7 @@
             }
           },
           "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
+            "$ref": "#/components/responses/Unauthorized"
           },
           "404": {
             "description": "job posting was not found",
@@ -600,11 +613,43 @@
             "type": "string"
           }
         }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
       }
     },
     "responses": {
-      "UnauthorizedError": {
-        "description": "Access token is missing or invalid"
+      "NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
       }
     },
     "securitySchemes": {
