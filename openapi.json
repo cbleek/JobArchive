@@ -10,7 +10,7 @@
       "url": "https://github.com/cbleek/JobArchive"
     },
     "x-logo": {
-      "url": "https://github.com/cross-solution/YAWIK/blob/develop/module/Core/public/images/logo.jpg",
+      "url": "https://raw.githubusercontent.com/cross-solution/YAWIK/develop/module/Core/public/images/logo.jpg",
       "altText": "Yawik logo"
     },
     "license": {
@@ -58,7 +58,7 @@
           "auth"
         ],
         "summary": "Create user",
-        "description": "User be able to sign up with username, password, email. After sign up backend will send token to email.",
+        "description": "User be able to sign up with password, email. After sign up backend will send token to email.",
         "operationId": "signupuser",
         "requestBody": {
           "description": "Created user object",
@@ -68,9 +68,8 @@
                 "$ref": "#/components/schemas/User"
               },
               "example": {
-                "username": "test",
                 "email": "test@test.com",
-                "password": "test"
+                "password": "secret"
               }
             }
           },
@@ -80,8 +79,8 @@
           "200": {
             "description": "New user successfully created."
           },
-          "default": {
-            "description": "The eamil is using by someone else."
+          "402": {
+            "description": "email is already in use."
           }
         },
         "security": []
@@ -113,22 +112,14 @@
         "responses": {
           "200": {
             "description": "successful operation",
-            "headers": {
-              "X-Rate-Limit": {
-                "description": "calls per hour allowed by the user",
-                "schema": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+            "headers": [
+              {
+                "$ref": "#/components/headers/X-Rate-Limit"
               },
-              "X-Expires-After": {
-                "description": "date in UTC when token expires",
-                "schema": {
-                  "type": "string",
-                  "format": "date-time"
-                }
+              {
+                "$ref": "#/components/headers/X-Expires-After"
               }
-            },
+            ],
             "content": {
               "application/xml": {
                 "schema": {
@@ -148,7 +139,8 @@
             "description": "Invalid email/password supplied"
           },
           "404": {
-            "description": "User not found"
+            "$ref": "#/components/responses/NotFound",
+            ":/user/{ref}": null
           },
           "422": {
             "description": "email/password not supplied"
@@ -158,7 +150,7 @@
       }
     },
     "/logout": {
-      "post": {
+      "get": {
         "tags": [
           "auth"
         ],
@@ -175,37 +167,54 @@
         }
       }
     },
-    "/validateemail": {
+    "/validate/{token}": {
       "get": {
         "tags": [
           "auth"
         ],
-        "summary": "Confirm user's email address",
+        "summary": "confirm email address",
         "operationId": "confirmemail",
         "parameters": [
           {
-            "in": "query",
+            "in": "path",
             "name": "token",
-            "description": "this token is from backend after sign up",
+            "description": "after signup, an email with a confirmation link is send to the user's email address.",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "example": "awevbbrntye2y53n5467xcvbn35u7mu3456"
+            "example": {
+              "token": "awevbbrntye2y53n5467xcvbn35u7mu3456"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Email address has been confirmed."
           },
-          "default": {
-            "description": "Something went wrong"
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            ":/validate/{token}": null
           }
         },
         "security": []
       }
     },
-    "/api/user": {
+    "/user/list": {
+      "get": {
+        "summary": "list user by reference",
+        "tags": [
+          "user"
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "security": []
+      }
+    },
+    "/user": {
       "get": {
         "tags": [
           "user"
@@ -213,6 +222,11 @@
         "summary": "Gets a user by ID.",
         "description": "A detailed description of the operation. Use markdown for rich text representation, such as **bold**, *italic*, and [links](https://swagger.io).\n",
         "operationId": "getuser",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/refInQuery"
+          }
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -222,19 +236,7 @@
                   "$ref": "#/components/schemas/User"
                 },
                 "example": {
-                  "username": "test",
-                  "email": "test@test.com",
-                  "password": "test"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                },
-                "example": {
-                  "username": "test",
-                  "email": "test@test.com",
-                  "password": "test"
+                  "$ref": "#/components/examples/User"
                 }
               }
             }
@@ -259,7 +261,6 @@
                 "$ref": "#/components/schemas/User"
               },
               "example": {
-                "username": "test",
                 "email": "test@test.com",
                 "password": "test"
               }
@@ -293,39 +294,7 @@
         }
       }
     },
-    "/api/addjoblink": {
-      "post": {
-        "tags": [
-          "job"
-        ],
-        "summary": "Post a link",
-        "description": "An authenticated user be able to post a link",
-        "operationId": "addjoblink",
-        "requestBody": {
-          "description": "Job url",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Job"
-              },
-              "example": {
-                "url": "http://example/job1"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Job link added successfully."
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          }
-        }
-      }
-    },
-    "/api/listlinks": {
+    "/job/list": {
       "get": {
         "tags": [
           "job"
@@ -335,6 +304,12 @@
         "operationId": "getjoblinks",
         "parameters": [
           {
+            "$ref": "#/components/parameters/offset"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
             "in": "query",
             "name": "type",
             "schema": {
@@ -343,6 +318,7 @@
                 "all",
                 "mine"
               ],
+              "default": "mine",
               "example": "all"
             },
             "description": "if type='all' user be able to retrieve all jobads but not 'all' user will retrieve his own posted jobads"
@@ -354,17 +330,29 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Job"
-                  }
+                  "$ref": "#/components/schemas/JobList"
                 },
                 "example": {
                   "joblinks": [
-                    "http://example/job1",
-                    "http://example/job2"
+                    {
+                      "ref:'5WiXXyCyW3qhuxgUJ1tw'": null,
+                      "url:'http://example.com/job1'": null
+                    },
+                    {
+                      "ref:'ADTcFEgwguKqXvGA41sK'": null,
+                      "url:'http://example.com/job2'": null
+                    }
                   ]
                 }
+              }
+            },
+            "links": {
+              "GetJobDetails": {
+                "operationId": "getJobDetail",
+                "parameters": {
+                  "userId": "$response.body#/ref"
+                },
+                "description": "The `ref` value returned in the response can be used as the `userId` parameter in `GET /spi/job/{userId}`.\n"
               }
             }
           },
@@ -374,21 +362,55 @@
         }
       }
     },
-    "/api/job": {
+    "/job/archive": {
+      "post": {
+        "tags": [
+          "job"
+        ],
+        "summary": "Post a link",
+        "description": "sending an url to a job posting means to request a jobposting to be archived.",
+        "operationId": "addjoblink",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          {
+            "in": "query",
+            "name": "perm",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job link added successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/job/{ref}": {
       "get": {
         "tags": [
           "job"
         ],
         "summary": "get a job posting",
         "description": "get details of a job posting",
+        "operationId": "getJobDetail",
         "parameters": [
           {
-            "in": "query",
-            "name": "id",
-            "schema": {
-              "type": "string",
-              "example": "myReference-234"
-            }
+            "$ref": "#/components/parameters/refInPath"
           }
         ],
         "responses": {
@@ -406,7 +428,26 @@
             "$ref": "#/components/responses/Unauthorized"
           },
           "404": {
-            "description": "job posting was not found",
+            "$ref": "#/components/responses/NotFound",
+            ":/job/{ref}": null
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "job"
+        ],
+        "summary": "delete a job posting",
+        "description": "get details of a job posting",
+        "operationId": "deleteJobPosting",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/refInPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "gets detail of a job posting",
             "content": {
               "application/json": {
                 "schema": {
@@ -415,15 +456,13 @@
               }
             }
           },
-          "410": {
-            "description": "job posting was found, but the posting was deleted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Job"
-                }
-              }
-            }
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            ":/job/{ref}": null
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            ":/job/{ref}": null
           }
         }
       }
@@ -434,9 +473,6 @@
       "User": {
         "type": "object",
         "properties": {
-          "username": {
-            "type": "string"
-          },
           "email": {
             "type": "string",
             "format": "email"
@@ -469,6 +505,13 @@
             "readOnly": true,
             "nullable": true,
             "description": "optional The title of the job (not the title of the posting). For example, \"Software Engineer\" or \"Barista\". For example."
+          },
+          "dateArchived": {
+            "type": "string",
+            "readOnly": true,
+            "nullable": true,
+            "format": "date-time",
+            "description": "optional start date of a job posting."
           },
           "datePosted": {
             "type": "string",
@@ -549,6 +592,19 @@
           "name": "Job"
         }
       },
+      "JobList": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "Place": {
         "type": "object",
         "properties": {
@@ -627,10 +683,92 @@
         "required": [
           "code",
           "message"
-        ]
+        ],
+        "example": {
+          "code": 401,
+          "message": "Authorization failure"
+        }
+      }
+    },
+    "examples": {
+      "User": {
+        "value": "test"
+      }
+    },
+    "headers": {
+      "X-Rate-Limit": {
+        "description": "calls per hour allowed by the user",
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "X-Expires-After": {
+        "description": "date in UTC when token expires",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "parameters": {
+      "offset": {
+        "name": "o",
+        "in": "query",
+        "description": "Number of items to skip before returning the results.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0,
+          "default": 0
+        }
+      },
+      "limit": {
+        "name": "l",
+        "in": "query",
+        "description": "Maximum number of items to return.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        }
+      },
+      "refInPath": {
+        "name": "ref",
+        "in": "path",
+        "description": "Reference to a document",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "Yv9RO9JfAxxI3Wkyqweg"
+        }
+      },
+      "refInQuery": {
+        "name": "ref",
+        "in": "query",
+        "description": "Reference to a document",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "Yv9RO9JfAxxI3Wkyqweg"
+        }
       }
     },
     "responses": {
+      "Success": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
       "NotFound": {
         "description": "The specified resource was not found",
         "content": {
