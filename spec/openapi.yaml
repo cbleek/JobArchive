@@ -79,7 +79,8 @@ paths:
         '200':
           description: successful operation
           headers:
-            $ref: '#/components/headers/Bearer'
+            - $ref: '#/components/headers/X-Rate-Limit'
+            - $ref: '#/components/headers/X-Expires-After'
           content:
             application/xml:
               schema:
@@ -134,7 +135,7 @@ paths:
       summary: list user by reference
       tags:
         - user
-      response:
+      responses:
         '401':
           $ref: '#/components/responses/Unauthorized'
       security: []
@@ -245,26 +246,22 @@ paths:
       summary: Post a link
       description: sending an url to a job posting means to request a jobposting to be archived.
       operationId: addjoblink
-      requestBody:
-        description: Job url
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Job'
-            example:
-              ref: 'I7zTrqeJ77MPjnfRMxzN'  
-              url: 'http://example.com/job1'
-        required: true
+      parameters:
+        - in: query
+          name: url
+          required: true
+          schema:
+            type: string
+            format: uri
+        - in: query
+          name: perm
+          required: false
+          schema:
+            type: string
+            format: uri
       responses:
         '200':
           description: Job link added successfully.
-          content:
-            application/json:
-              schema:
-                ref:
-                  type: string
-                url:
-                  type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
   /job/{ref}:
@@ -292,7 +289,7 @@ paths:
        - job
       summary: delete a job posting
       description: get details of a job posting
-      operationId: getJobDetail
+      operationId: deleteJobPosting
       parameters:
         - $ref: '#/components/parameters/refInPath'
       responses:
@@ -476,21 +473,18 @@ components:
         message: Authorization failure
   examples:
     User:
-      email: test@test.com
-      password: test
-      emailVarified: 1
+      value: 'test'
   headers:
-    Bearer: # Can be referenced as '#/components/headers/Bearer'
-      X-Rate-Limit:
-        description: calls per hour allowed by the user
-        schema:
-          type: integer
-          format: int32
-      X-Expires-After:
-        description: date in UTC when token expires
-        schema:
-          type: string
-          format: date-time
+    X-Rate-Limit: # # Can be referenced as '#/components/headers/X-Rate-Limi'
+      description: calls per hour allowed by the user
+      schema:
+        type: integer
+        format: int32
+    X-Expires-After:  # # Can be referenced as '#/components/headers/X-Expires-After'
+      description: date in UTC when token expires
+      schema:
+        type: string
+        format: date-time
   parameters:
     offset: # Can be referenced via '#/components/parameters/offset'
       name: o
@@ -523,7 +517,7 @@ components:
         example: Yv9RO9JfAxxI3Wkyqweg
     refInQuery: # Can be referenced as '#/components/parameters/refInQuery'
       name: ref
-      in: path
+      in: query
       description: Reference to a document
       required: false
       schema:
