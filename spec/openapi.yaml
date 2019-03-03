@@ -49,7 +49,7 @@ paths:
       tags:
         - auth
       summary: Sign in with email and password
-      description: 'User be able to sign into the system and server will respond access-token, and this access-token should be stored in session. This access-token will be used to use other api. Backend will identify user using access-token.'
+      description: 'Signin creates a User Session. User be able to sign into the system and server will respond access-token, and this access-token should be stored in session. This access-token will be used to use other api. Backend will identify user using access-token.'
       operationId: signin
       requestBody:
         description: Created user object
@@ -96,7 +96,7 @@ paths:
       tags:
         - auth
       summary: Logs out current logged in user
-      description: ''
+      description: 'Destoys a User Session.'
       operationId: logoutUser
       responses:
         '200':
@@ -229,21 +229,21 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Location'
+                  $ref: '#/components/schemas/Job'
               example:
                 joblinks:
                   - 'http://example/job1'
                   - 'http://example/job2'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-/api/job:
+  /api/job:
     get:
       tags:
         - job
       summary: get a job posting
-      description: get detailais of a job posting
+      description: get details of a job posting
       parameters:
-        - in: id
+        - in: query
           name: id
           schema:
             type: string
@@ -269,7 +269,6 @@ paths:
                 $ref: '#/components/schemas/Job'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-            
 components:
   schemas:
     User:
@@ -334,6 +333,11 @@ components:
               - "PER_DIEM"
               - "OTHER"
           description: Type of employment.
+        applicantLocationRequirements:
+          type: string
+          nullable: true
+          readOnly: true
+          description: https://developers.google.com/search/docs/data-types/job-posting?hl=en#applicant-location-requirements
         hiringOrganization:
           type: object
           nullable: true
@@ -346,11 +350,6 @@ components:
           readOnly: true
           items:
             $ref: '#/components/schemas/Salary'
-        applicantLocationRequirements:
-          type: object
-          nullable: true
-          items:
-            $ref: '#/components/schemas/applicantLocationRequirements'     
         jobLocation:
           type: array
           nullable: true
@@ -403,9 +402,6 @@ components:
       description: The organization offering the job position. This should be the name of the company (for example, “Starbucks, Inc”), and not the specific location that is hiring (for example, “Starbucks on Main Street”).
       
         https://schema.org/Organization
-    applicantLocationRequirements:
-      type: object
-      description: https://developers.google.com/search/docs/data-types/job-posting?hl=en#applicant-location-requirements
     SigninRequest:
       type: object
       properties:
