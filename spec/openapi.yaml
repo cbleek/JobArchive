@@ -70,21 +70,12 @@ paths:
                     type: string
                   emailVerified:
                     type: boolean
-        '402':
+        '460':
           description: email is already in use.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    format: int32
-                  message: 
-                    type: string
-              example:
-                code: 402
-                message: email is already in use.
+        '461':
+          description: password does not match required regex
+        '462':
+          description: haveibeenpwned returned true. https://haveibeenpwned.com/API/v2#PwnedPasswords
       security: []
   /login:
     post:
