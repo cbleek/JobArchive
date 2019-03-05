@@ -25,9 +25,9 @@ We just have to start.
 
 ## Links
 
-- [Reference Documentation (ReDoc)](https://sjhumili.github.io/swagger-test/)
-- [SwaggerUI](https://sjhumili.github.io/swagger-test/swagger-ui/)
-- OpenAPI Raw Files: [JSON](https://sjhumili.github.io/swagger-test/openapi.json) [YAML](https://sjhumili.github.io/swagger-test/openapi.yaml)
+- [API Documentation (ReDoc)](https://archive,yawik.org)
+- [API](https://api.yawik.org/)
+- OpenAPI Raw Files: [JSON](https://archive.yawik.org/openapi.json) [YAML](https://archive.yawik.org/openapi.yaml)
 
 **Warning:** All above links are updated only after Travis CI finishes deployment
 
