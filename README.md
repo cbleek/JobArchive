@@ -25,7 +25,7 @@ We just have to start.
 
 ## Links
 
-- [API Documentation (ReDoc)](https://archive,yawik.org)
+- [ReDoc API](https://archive.yawik.org)
 - [API](https://api.yawik.org/)
 - OpenAPI Raw Files: [JSON](https://archive.yawik.org/openapi.json) [YAML](https://archive.yawik.org/openapi.yaml)
 
