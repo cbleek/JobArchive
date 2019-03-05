@@ -226,7 +226,7 @@ paths:
                     'url:''http://example.com/job2''': null
           links:
             GetJobDetails:
-              operationId: getJobDetail
+              operationId: getJobDetails
               parameters:
                 userId: '$response.body#/ref'
               description: |
@@ -256,6 +256,13 @@ paths:
       responses:
         '200':
           description: Job link added successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ref:
+                    type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
   '/job/{ref}':
