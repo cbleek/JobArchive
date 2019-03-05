@@ -6,6 +6,11 @@ Large companies get this data, evaluate it and then offer results via API. But t
 There are many tools for evaluating data. The know-how on how to use these tools is there. And the infrastructure to store large amounts of data is also there.
 We just have to start.
 
+# Build Status
+
+[![Build Status](https://api.travis-ci.org/cbleek/JobArchive.svg)](https://travis-ci.org/cbleek/JobArchive)
+
+
 # JobArchive OpenAPI Specification
 ## Steps to finish
 
