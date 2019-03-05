@@ -35,7 +35,7 @@ tags:
 security:
   - bearerAuth: []
 paths:
-  /signup:
+  /register:
     post:
       tags:
         - auth
@@ -47,7 +47,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              email:
+                type: email
+                format: email
+                required: true
+              password:
+                type: sting
             example:
               email: test@test.com
               password: secret
@@ -55,10 +60,31 @@ paths:
       responses:
         '200':
           description: New user successfully created.
+          content:
+            application/json:
+              schema:
+                ref: 
+                  type: string
+                emailVerified:
+                  type: boolean
+              example:
+                ref: sJV1fhs3foIz1Wmdekl4
+                emailVerified: false
         '402':
           description: email is already in use.
+          content:
+            application/json:
+              schema:
+                code:
+                  type: integer
+                  format: int32
+                message: 
+                  type: string
+              example:
+                code: 402
+                message: email is already in use.
       security: []
-  /signin:
+  /login:
     post:
       tags:
         - auth
@@ -82,14 +108,12 @@ paths:
             - $ref: '#/components/headers/X-Rate-Limit'
             - $ref: '#/components/headers/X-Expires-After'
           content:
-            application/xml:
-              schema:
-                type: string
-                example: Bearer 35775k6dehgn678865k87k748o233
             application/json:
               schema:
-                type: string
-                example: Bearer 35775k6dehgn678865k87k748o233
+                bearer:
+                  type: string
+                  example: Bearer 35775k6dehgn678865k87k748o233
+
         '400':
           description: Invalid email/password supplied
         '404':
@@ -109,7 +133,7 @@ paths:
           description: User successfully log out.
         default:
           $ref: '#/components/responses/Unauthorized'
-  /validate/{token}:
+  /validateEmail/{token}:
     get:
       tags:
         - auth
@@ -132,23 +156,55 @@ paths:
       security: []
   /user/list:
     get:
-      summary: list user by reference
+      summary: list user by references
       tags:
         - user
+      description: user with "admin" role an list all users
+      operationId: getUsers
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
       responses:
+        '200':
+          description: gets a list of Users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+              example:
+                joblinks:
+                  - {ref:'5WiXXyCyW3qhuxgUJ1tw'}
+                  - {ref:'ADTcFEgwguKqXvGA41sK'}
+          links:
+            GetJobDetails:
+              operationId: getUserDetail
+              parameters:
+                userId: '$response.body#/ref'
+              description: >
+                The `ref` value returned in the response can be used  in 
+                `GET /user/{ref}`.
         '401':
           $ref: '#/components/responses/Unauthorized'
       security: []
-  /user:
+  /user/{ref}/role:
+    post:
+      tags:
+        - user
+      summary: grant a role to a user
+    delete:
+      tags:
+        - user
+      summary: delete a users role
+  /user/{ref}:
     get:
       tags:
         - user
-      summary: Gets a user by ID.
+      summary: Gets a user by `ref`.
       description: >
         A detailed description of the operation.
         Use markdown for rich text representation,
         such as **bold**, *italic*, and [links](https://swagger.io).
-      operationId: getuser
+      operationId: getUser
       parameters:
         - $ref: '#/components/parameters/refInQuery'
       responses:
@@ -167,7 +223,7 @@ paths:
         - user
       summary: Update user profile
       description: An authenticated user be able to update information.
-      operationId: updateuser
+      operationId: updateUser
       requestBody:
         description: Updated user object
         content:
@@ -231,7 +287,7 @@ paths:
                     url:'http://example.com/job2'}
           links:
             GetJobDetails:
-              operationId: getJobDetails
+              operationId: getJobDetail
               parameters:
                 userId: '$response.body#/ref'
               description: >
@@ -297,7 +353,7 @@ paths:
        - job
       summary: delete a job posting
       description: get details of a job posting
-      operationId: deleteJobPosting
+      operationId: getJobDetail
       parameters:
         - $ref: '#/components/parameters/refInPath'
       responses:
@@ -311,6 +367,7 @@ paths:
           $ref: '#/components/responses/Unauthorized':/job/{ref}:
         '404':
           $ref: '#/components/responses/NotFound':/job/{ref}:
+    
 components:
   schemas:
     User:
@@ -326,7 +383,10 @@ components:
           maxLength: 100
         emailVerified:
           type: boolean
-          nullable: true
+        active:
+          type: boolean
+        dateCreated:
+          type: date-time
       xml:
         name: User
     Job:
@@ -416,6 +476,12 @@ components:
             type: string
           url:
             type: string
+    List:
+      type: array
+      items:
+        properties:
+          id:
+            type: string
     Place:
       type: object
       properties:
@@ -481,7 +547,11 @@ components:
         message: Authorization failure
   examples:
     User:
-      value: 'test'
+      ref: 'KUFdmbjBNbFV688eMkKJ'
+      email: 'email@ecample.com'
+      emailValidated: true
+      active: true
+      dateCreated: 2019-01-01
   headers:
     X-Rate-Limit: # # Can be referenced as '#/components/headers/X-Rate-Limi'
       description: calls per hour allowed by the user
