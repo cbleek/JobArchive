@@ -47,12 +47,13 @@ paths:
         content:
           application/json:
             schema:
-              email:
-                type: email
-                format: email
-                required: true
-              password:
-                type: sting
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
             example:
               email: test@test.com
               password: secret
@@ -63,23 +64,24 @@ paths:
           content:
             application/json:
               schema:
-                ref: 
-                  type: string
-                emailVerified:
-                  type: boolean
-              example:
-                ref: sJV1fhs3foIz1Wmdekl4
-                emailVerified: false
+                type: object
+                properties:
+                  ref: 
+                    type: string
+                  emailVerified:
+                    type: boolean
         '402':
           description: email is already in use.
           content:
             application/json:
               schema:
-                code:
-                  type: integer
-                  format: int32
-                message: 
-                  type: string
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                  message: 
+                    type: string
               example:
                 code: 402
                 message: email is already in use.
@@ -96,7 +98,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SigninRequest'
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
             example:
               email: test@test.com
               password: test
@@ -110,10 +118,12 @@ paths:
           content:
             application/json:
               schema:
-                bearer:
-                  type: string
-                  example: Bearer 35775k6dehgn678865k87k748o233
-
+                type: object
+                properties:
+                  bearer:
+                    type: string      
+              example: 
+                bearer: 35775k6dehgn678865k87k748o233
         '400':
           description: Invalid email/password supplied
         '404':
@@ -170,7 +180,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserList'
+                $ref: '#/components/schemas/CommonList'
               example:
                 joblinks:
                   - {ref:'5WiXXyCyW3qhuxgUJ1tw'}
@@ -191,10 +201,24 @@ paths:
       tags:
         - user
       summary: grant a role to a user
+      parameters:
+        - $ref: '#/components/parameters/refInPath'
+      responses:
+        '200':
+          description: successful operation
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     delete:
       tags:
         - user
       summary: delete a users role
+      parameters:
+        - $ref: '#/components/parameters/refInPath'
+      responses:
+        '200':
+          description: successful operation
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /user/{ref}:
     get:
       tags:
@@ -206,7 +230,7 @@ paths:
         such as **bold**, *italic*, and [links](https://swagger.io).
       operationId: getUser
       parameters:
-        - $ref: '#/components/parameters/refInQuery'
+        - $ref: '#/components/parameters/refInPath'
       responses:
         '200':
           description: successful operation
@@ -224,6 +248,8 @@ paths:
       summary: Update user profile
       description: An authenticated user be able to update information.
       operationId: updateUser
+      parameters:
+        - $ref: '#/components/parameters/refInPath'
       requestBody:
         description: Updated user object
         content:
@@ -244,6 +270,8 @@ paths:
         - user
       summary: Delete user
       description: User be able to delete profile.
+      parameters:
+        - $ref: '#/components/parameters/refInPath'
       operationId: deleteUser
       responses:
         '200':
@@ -353,7 +381,7 @@ paths:
        - job
       summary: delete a job posting
       description: get details of a job posting
-      operationId: getJobDetail
+      operationId: deleteJob
       parameters:
         - $ref: '#/components/parameters/refInPath'
       responses:
@@ -386,7 +414,8 @@ components:
         active:
           type: boolean
         dateCreated:
-          type: date-time
+          type: string
+          format: date-time
       xml:
         name: User
     Job:
@@ -468,6 +497,12 @@ components:
             $ref: '#/components/schemas/User'
       xml:
         name: Job
+    CommonList:
+      type: array
+      items:
+        properties:
+          id:
+            type: string
     JobList:
       type: array
       items:
@@ -475,12 +510,6 @@ components:
           id:
             type: string
           url:
-            type: string
-    List:
-      type: array
-      items:
-        properties:
-          id:
             type: string
     Place:
       type: object
@@ -522,21 +551,15 @@ components:
       description: 
         The organization offering the job position. This should be the name of the company (for example, “Starbucks, Inc”), and not the specific location that is hiring (for example, “Starbucks on Main Street”).
             
-        https://schema.org/Organization
-        
-    SigninRequest:
-      type: object
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-    # Schema for error response body
+        https://schema.org/Organization        
+
     Error:
       type: object
       properties:
         code:
-          type: string
+          type: integer
+          minimum: 100
+          maximum: 600
         message:
           type: string
       required:
@@ -547,11 +570,12 @@ components:
         message: Authorization failure
   examples:
     User:
-      ref: 'KUFdmbjBNbFV688eMkKJ'
-      email: 'email@ecample.com'
-      emailValidated: true
-      active: true
-      dateCreated: 2019-01-01
+      value: >
+        ref: 'KUFdmbjBNbFV688eMkKJ'
+        email: 'email@ecample.com'
+        emailValidated: true
+        active: true
+        dateCreated: 2019-01-01
   headers:
     X-Rate-Limit: # # Can be referenced as '#/components/headers/X-Rate-Limi'
       description: calls per hour allowed by the user
