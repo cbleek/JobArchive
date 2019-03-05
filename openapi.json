@@ -52,7 +52,7 @@
     }
   ],
   "paths": {
-    "/signup": {
+    "/register": {
       "post": {
         "tags": [
           "auth"
@@ -65,7 +65,16 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
               },
               "example": {
                 "email": "test@test.com",
@@ -77,16 +86,37 @@
         },
         "responses": {
           "200": {
-            "description": "New user successfully created."
+            "description": "New user successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string"
+                    },
+                    "emailVerified": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
           },
-          "402": {
+          "460": {
             "description": "email is already in use."
+          },
+          "461": {
+            "description": "password does not match required regex"
+          },
+          "462": {
+            "description": "haveibeenpwned returned true. https://haveibeenpwned.com/API/v2#PwnedPasswords"
           }
         },
         "security": []
       }
     },
-    "/signin": {
+    "/login": {
       "post": {
         "tags": [
           "auth"
@@ -99,7 +129,16 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SigninRequest"
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
               },
               "example": {
                 "email": "test@test.com",
@@ -121,16 +160,17 @@
               }
             ],
             "content": {
-              "application/xml": {
-                "schema": {
-                  "type": "string",
-                  "example": "Bearer 35775k6dehgn678865k87k748o233"
-                }
-              },
               "application/json": {
                 "schema": {
-                  "type": "string",
-                  "example": "Bearer 35775k6dehgn678865k87k748o233"
+                  "type": "object",
+                  "properties": {
+                    "bearer": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "bearer": "35775k6dehgn678865k87k748o233"
                 }
               }
             }
@@ -167,7 +207,7 @@
         }
       }
     },
-    "/validate/{token}": {
+    "/validateEmail/{token}": {
       "get": {
         "tags": [
           "auth"
@@ -202,11 +242,50 @@
     },
     "/user/list": {
       "get": {
-        "summary": "list user by reference",
+        "summary": "list user by references",
         "tags": [
           "user"
         ],
+        "description": "user with \"admin\" role an list all users",
+        "operationId": "getUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/offset"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
         "responses": {
+          "200": {
+            "description": "gets a list of Users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonList"
+                },
+                "example": {
+                  "joblinks": [
+                    {
+                      "ref:'5WiXXyCyW3qhuxgUJ1tw'": null
+                    },
+                    {
+                      "ref:'ADTcFEgwguKqXvGA41sK'": null
+                    }
+                  ]
+                }
+              }
+            },
+            "links": {
+              "GetJobDetails": {
+                "operationId": "getUserDetail",
+                "parameters": {
+                  "userId": "$response.body#/ref"
+                },
+                "description": "The `ref` value returned in the response can be used  in  `GET /user/{ref}`.\n"
+              }
+            }
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           }
@@ -214,17 +293,57 @@
         "security": []
       }
     },
-    "/user": {
+    "/user/{ref}/role": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "grant a role to a user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/refInPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "delete a users role",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/refInPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/user/{ref}": {
       "get": {
         "tags": [
           "user"
         ],
-        "summary": "Gets a user by ID.",
+        "summary": "Gets a user by `ref`.",
         "description": "A detailed description of the operation. Use markdown for rich text representation, such as **bold**, *italic*, and [links](https://swagger.io).\n",
-        "operationId": "getuser",
+        "operationId": "getUser",
         "parameters": [
           {
-            "$ref": "#/components/parameters/refInQuery"
+            "$ref": "#/components/parameters/refInPath"
           }
         ],
         "responses": {
@@ -252,7 +371,12 @@
         ],
         "summary": "Update user profile",
         "description": "An authenticated user be able to update information.",
-        "operationId": "updateuser",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/refInPath"
+          }
+        ],
         "requestBody": {
           "description": "Updated user object",
           "content": {
@@ -283,6 +407,11 @@
         ],
         "summary": "Delete user",
         "description": "User be able to delete profile.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/refInPath"
+          }
+        ],
         "operationId": "deleteUser",
         "responses": {
           "200": {
@@ -348,7 +477,7 @@
             },
             "links": {
               "GetJobDetails": {
-                "operationId": "getJobDetails",
+                "operationId": "getJobDetail",
                 "parameters": {
                   "userId": "$response.body#/ref"
                 },
@@ -451,7 +580,7 @@
         ],
         "summary": "delete a job posting",
         "description": "get details of a job posting",
-        "operationId": "deleteJobPosting",
+        "operationId": "deleteJob",
         "parameters": [
           {
             "$ref": "#/components/parameters/refInPath"
@@ -496,8 +625,14 @@
             "maxLength": 100
           },
           "emailVerified": {
-            "type": "boolean",
-            "nullable": true
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "xml": {
@@ -604,6 +739,16 @@
           "name": "Job"
         }
       },
+      "CommonList": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "JobList": {
         "type": "array",
         "items": {
@@ -671,22 +816,13 @@
         },
         "description": "The organization offering the job position. This should be the name of the company (for example, “Starbucks, Inc”), and not the specific location that is hiring (for example, “Starbucks on Main Street”).\nhttps://schema.org/Organization"
       },
-      "SigninRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        }
-      },
       "Error": {
         "type": "object",
         "properties": {
           "code": {
-            "type": "string"
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 600
           },
           "message": {
             "type": "string"
@@ -704,7 +840,7 @@
     },
     "examples": {
       "User": {
-        "value": "test"
+        "value": "ref: 'KUFdmbjBNbFV688eMkKJ' email: 'email@ecample.com' emailValidated: true active: true dateCreated: 2019-01-01\n"
       }
     },
     "headers": {

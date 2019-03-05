@@ -32,7 +32,7 @@ tags:
 security:
   - bearerAuth: []
 paths:
-  /signup:
+  /register:
     post:
       tags:
         - auth
@@ -44,7 +44,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
             example:
               email: test@test.com
               password: secret
@@ -52,10 +58,23 @@ paths:
       responses:
         '200':
           description: New user successfully created.
-        '402':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ref:
+                    type: string
+                  emailVerified:
+                    type: boolean
+        '460':
           description: email is already in use.
+        '461':
+          description: password does not match required regex
+        '462':
+          description: 'haveibeenpwned returned true. https://haveibeenpwned.com/API/v2#PwnedPasswords'
       security: []
-  /signin:
+  /login:
     post:
       tags:
         - auth
@@ -67,7 +86,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SigninRequest'
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
             example:
               email: test@test.com
               password: test
@@ -79,14 +104,14 @@ paths:
             - $ref: '#/components/headers/X-Rate-Limit'
             - $ref: '#/components/headers/X-Expires-After'
           content:
-            application/xml:
-              schema:
-                type: string
-                example: Bearer 35775k6dehgn678865k87k748o233
             application/json:
               schema:
-                type: string
-                example: Bearer 35775k6dehgn678865k87k748o233
+                type: object
+                properties:
+                  bearer:
+                    type: string
+              example:
+                bearer: 35775k6dehgn678865k87k748o233
         '400':
           description: Invalid email/password supplied
         '404':
@@ -107,7 +132,7 @@ paths:
           description: User successfully log out.
         default:
           $ref: '#/components/responses/Unauthorized'
-  '/validate/{token}':
+  '/validateEmail/{token}':
     get:
       tags:
         - auth
@@ -131,23 +156,68 @@ paths:
       security: []
   /user/list:
     get:
-      summary: list user by reference
+      summary: list user by references
       tags:
         - user
+      description: user with "admin" role an list all users
+      operationId: getUsers
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
       responses:
+        '200':
+          description: gets a list of Users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonList'
+              example:
+                joblinks:
+                  - 'ref:''5WiXXyCyW3qhuxgUJ1tw''': null
+                  - 'ref:''ADTcFEgwguKqXvGA41sK''': null
+          links:
+            GetJobDetails:
+              operationId: getUserDetail
+              parameters:
+                userId: '$response.body#/ref'
+              description: |
+                The `ref` value returned in the response can be used  in  `GET /user/{ref}`.
         '401':
           $ref: '#/components/responses/Unauthorized'
       security: []
-  /user:
+  '/user/{ref}/role':
+    post:
+      tags:
+        - user
+      summary: grant a role to a user
+      parameters:
+        - $ref: '#/components/parameters/refInPath'
+      responses:
+        '200':
+          description: successful operation
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags:
+        - user
+      summary: delete a users role
+      parameters:
+        - $ref: '#/components/parameters/refInPath'
+      responses:
+        '200':
+          description: successful operation
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  '/user/{ref}':
     get:
       tags:
         - user
-      summary: Gets a user by ID.
+      summary: Gets a user by `ref`.
       description: |
         A detailed description of the operation. Use markdown for rich text representation, such as **bold**, *italic*, and [links](https://swagger.io).
-      operationId: getuser
+      operationId: getUser
       parameters:
-        - $ref: '#/components/parameters/refInQuery'
+        - $ref: '#/components/parameters/refInPath'
       responses:
         '200':
           description: successful operation
@@ -164,7 +234,9 @@ paths:
         - user
       summary: Update user profile
       description: An authenticated user be able to update information.
-      operationId: updateuser
+      operationId: updateUser
+      parameters:
+        - $ref: '#/components/parameters/refInPath'
       requestBody:
         description: Updated user object
         content:
@@ -185,6 +257,8 @@ paths:
         - user
       summary: Delete user
       description: User be able to delete profile.
+      parameters:
+        - $ref: '#/components/parameters/refInPath'
       operationId: deleteUser
       responses:
         '200':
@@ -226,7 +300,7 @@ paths:
                     'url:''http://example.com/job2''': null
           links:
             GetJobDetails:
-              operationId: getJobDetails
+              operationId: getJobDetail
               parameters:
                 userId: '$response.body#/ref'
               description: |
@@ -291,7 +365,7 @@ paths:
         - job
       summary: delete a job posting
       description: get details of a job posting
-      operationId: deleteJobPosting
+      operationId: deleteJob
       parameters:
         - $ref: '#/components/parameters/refInPath'
       responses:
@@ -322,7 +396,11 @@ components:
           maxLength: 100
         emailVerified:
           type: boolean
-          nullable: true
+        active:
+          type: boolean
+        dateCreated:
+          type: string
+          format: date-time
       xml:
         name: User
     Job:
@@ -404,6 +482,12 @@ components:
             $ref: '#/components/schemas/User'
       xml:
         name: Job
+    CommonList:
+      type: array
+      items:
+        properties:
+          id:
+            type: string
     JobList:
       type: array
       items:
@@ -452,18 +536,13 @@ components:
       description: |-
         The organization offering the job position. This should be the name of the company (for example, “Starbucks, Inc”), and not the specific location that is hiring (for example, “Starbucks on Main Street”).
         https://schema.org/Organization
-    SigninRequest:
-      type: object
-      properties:
-        email:
-          type: string
-        password:
-          type: string
     Error:
       type: object
       properties:
         code:
-          type: string
+          type: integer
+          minimum: 100
+          maximum: 600
         message:
           type: string
       required:
@@ -474,7 +553,8 @@ components:
         message: Authorization failure
   examples:
     User:
-      value: test
+      value: |
+        ref: 'KUFdmbjBNbFV688eMkKJ' email: 'email@ecample.com' emailValidated: true active: true dateCreated: 2019-01-01
   headers:
     X-Rate-Limit:
       description: calls per hour allowed by the user
